@@ -41,11 +41,16 @@ def _get_user_by_username_or_email(identifier):
 class LoginView(APIView):
     """Return auth token for username/email + password. CSRF-exempt for Streamlit/Postman."""
     permission_classes = [AllowAny]
-    parser_classes = [JSONParser, FormParser]
+    parser_classes = [JSONParser, FormParser, MultiPartParser]
 
     def post(self, request):
-        username_or_email = request.data.get("username") or request.POST.get("username")
-        password = request.data.get("password") or request.POST.get("password")
+        # Support both form (data=) and JSON (json=) from clients
+        data = getattr(request, "data", None) or request.POST
+        username_or_email = (
+            (data.get("username") or data.get("email") or "").strip()
+            if data else ""
+        )
+        password = (data.get("password") or "") if data else ""
         if not username_or_email or not password:
             return Response(
                 {"detail": "Username/email and password are required"},

@@ -129,7 +129,15 @@ def login_form():
         username = st.text_input("Email or username", placeholder="Enter your email or username")
         password = st.text_input("Password", type="password", placeholder="Enter your password")
         if st.form_submit_button("Log in"):
-            r = post("/login/", data={"username": username, "password": password})
+            try:
+                r = post("/login/", data={"username": username, "password": password}, timeout=10)
+            except requests.exceptions.ConnectionError:
+                st.error(
+                    "**Cannot reach the API.** Start the Django backend first in another terminal:\n\n"
+                    "`cd tutorials_backend && python manage.py runserver`\n\n"
+                    f"Backend URL: `{API_BASE}`"
+                )
+                return
             if r.status_code == 200:
                 data = r.json()
                 st.session_state.token = data["token"]
@@ -172,13 +180,21 @@ def register_form():
         full_name = st.text_input("Full name (optional)", placeholder="Your full name")
         role = st.selectbox("I am a", ["Student", "Teacher"])
         if st.form_submit_button("Register"):
-            r = post("/register/", json={
-                "username": username,
-                "email": email or "",
-                "password": password,
-                "full_name": full_name or "",
-                "role": role,
-            })
+            try:
+                r = post("/register/", json={
+                    "username": username,
+                    "email": email or "",
+                    "password": password,
+                    "full_name": full_name or "",
+                    "role": role,
+                }, timeout=10)
+            except requests.exceptions.ConnectionError:
+                st.error(
+                    "**Cannot reach the API.** Start the Django backend first in another terminal:\n\n"
+                    "`cd tutorials_backend && python manage.py runserver`\n\n"
+                    f"Backend URL: `{API_BASE}`"
+                )
+                return
             if r.status_code == 201:
                 data = r.json()
                 st.session_state.token = data["token"]

@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -29,7 +30,7 @@ SECRET_KEY = 'django-insecure-1*vtx2e7cg#u6@2aw$43v*58$v^_eabkt)_#9#oqbt$j2xn%49
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
 
 # Application definition
@@ -85,10 +86,7 @@ WSGI_APPLICATION = 'tutorials_backend.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-# PostgreSQL by default. Override with env vars (PGDATABASE, PGUSER, PGPASSWORD, etc.).
-# Set USE_SQLITE=1 to use SQLite instead.
-import os
-
+# Default: PostgreSQL. Set USE_SQLITE=1 in env to use SQLite instead.
 if os.environ.get("USE_SQLITE") == "1":
     DATABASES = {
         "default": {
@@ -101,7 +99,7 @@ else:
         "default": {
             "ENGINE": "django.db.backends.postgresql",
             "NAME": os.environ.get("PGDATABASE", "tutorials"),
-            "USER": os.environ.get("PGUSER", "tutorials_user"),
+            "USER": os.environ.get("PGUSER", "postgres"),
             "PASSWORD": os.environ.get("PGPASSWORD", ""),
             "HOST": os.environ.get("PGHOST", "localhost"),
             "PORT": os.environ.get("PGPORT", "5432"),
